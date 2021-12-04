@@ -1,0 +1,6 @@
+/cdp
+/test
+/test-def.c
+*.o
+*.a
+*.exe
