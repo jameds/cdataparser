@@ -1,4 +1,4 @@
-CPPFLAGS+=-DCOMMIT=`git show-ref --head -s --abbrev HEAD`
+CPPFLAGS+=-DCOMMIT=`git rev-parse --short HEAD`
 
 all : cdp cdata.a
 
