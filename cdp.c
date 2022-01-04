@@ -1,5 +1,5 @@
 /*
-Copyright 2021 James R.
+Copyright 2022 James R.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or
