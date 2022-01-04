@@ -32,7 +32,8 @@ How to use these macros in your source code:
 PACKDEF(id)
 Marks a structure definition to generate a packdef. All
 struct members, including those of nested anonymous
-structs, are included by default.
+structs, are included by default. Pointers are excluded
+except when using a custom packing function or PACKNEST.
 
 	PACKDEF (my_def) struct my_struct {
 	};

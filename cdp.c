@@ -62,6 +62,7 @@ int mode2 = NONE;
 
 int inlinetag;
 int nest;
+int star;
 
 char keyword[sizeof "struct"];
 char tag[MAXINTID + 1];
@@ -296,10 +297,17 @@ parse_token (char *p)
 			mode1 = *p == ',' ? FIELDNAME : FIELD;
 			mode2 = NONE;
 
-			if (fieldflag[numfields] == 0)
-				numlinks[0]++;
+			/* ignore pointers unless using custom packer or
+				nested definition */
+			if (fieldflag[numfields] != 0 || !star)
+			{
+				if (fieldflag[numfields] == 0)
+					numlinks[0]++;
 
-			numfields++;
+				numfields++;
+			}
+
+			star = 0;
 		}
 		else if (*p == mode2)
 		{
@@ -430,10 +438,17 @@ parse_token (char *p)
 
 				if (check_nest(p))
 				{
-					wordcpy(fields[numfields], p, n, MAXINTID);
-					fieldflag[numfields] = 0;
-					alignment[numfields] = ALIGN_SCALAR;
-					mode2 = ';';
+					/* skip asterisk of pointer */
+					if (*p == '*')
+						star = 1;
+					else
+					{
+						wordcpy(fields[numfields],
+								p, n, MAXINTID);
+						fieldflag[numfields] = 0;
+						alignment[numfields] = ALIGN_SCALAR;
+						mode2 = ';';
+					}
 				}
 				break;
 

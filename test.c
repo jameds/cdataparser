@@ -10,13 +10,13 @@ pack_B_b
 		size_t size,
 		void * var)
 {
-	int *n = var;
+	void **n = var;
 
 	if (mode == CDATA_READ)
 	{
 		if (size == 2)
 		{
-			*n = cdata_decode16(buffer) / 2;
+			*n = (void*)(cdata_decode16(buffer) / 2);
 		}
 	}
 	else if (mode == CDATA_WRITE)
@@ -26,7 +26,8 @@ pack_B_b
 		if (buffer)
 		{
 			cdata_encode16(
-					cdata_wire_offset(buffer, size), *n * 2);
+					cdata_wire_offset(buffer, size),
+					(long)*n * 2);
 		}
 	}
 
@@ -41,7 +42,7 @@ PACKDEF (A_def) struct A {
 
 PACKDEF (B_def) typedef struct {
 	struct A a PACKNEST (A_def);
-	int b PACK (pack_B_b);
+	int *b PACK (pack_B_b);
 } B;
 
 #ifndef cdp_stage
@@ -97,7 +98,7 @@ main
 		strncpy(bruh.a.a, "Shit", 4);
 		bruh.a.c[0] = 127;
 		bruh.a.c[1] = 4096;
-		bruh.b = 33;
+		bruh.b = (void*)33;
 		enpack(&bruh);
 	}
 	else if (!strcmp(av[1], "d"))
@@ -109,7 +110,7 @@ main
 		printf(
 				"%.4s\n"
 				"%d, %d\n"
-				"%d\n",
+				"%p\n",
 				bruh.a.a,
 				bruh.a.c[0],
 				bruh.a.c[1],
