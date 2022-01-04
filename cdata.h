@@ -26,6 +26,48 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
+/*
+How to use these macros in your source code:
+
+PACKDEF(id)
+Marks a structure definition to generate a packdef. All
+struct members, including those of nested anonymous
+structs, are included by default.
+
+	PACKDEF (my_def) struct my_struct {
+	};
+
+PACK(alignment)
+Manually set the alignment of a struct member, integer >1.
+
+	// a now has 2-byte alignment, regardless of type.
+	int a[8] PACK (2);
+
+PACK(custom packing function)
+Use a custom callback to pack this struct member. This
+allows for packing variable length data. See the typedef
+for cdata_packer.
+
+	int b PACK (pack_b_member);
+
+PACKNEST(packdef id)
+Reuse a packdef for this struct member.
+
+	struct my_other_struct c PACKNEST (my_other_def);
+
+DONOTPACK
+Exclude this struct member from the packdef.
+
+	int d DONOTPACK;
+
+PACKTHIS
+Explicitly include a struct member in the packdef. This is
+only required if cdp was compiled with DEFAULT_NOPACK
+defined.
+
+	int d PACKTHIS;
+*/
+
 #ifndef cdataparser_cdata_H
 #define cdataparser_cdata_H
 
