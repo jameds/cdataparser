@@ -15,5 +15,5 @@ test.o : test.c | cdp
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean :
-	$(RM) cdp cdp.exe test test.exe test.o \
+	$(RM) cdp cdp.exe test test.exe test.o test-def.c \
 		cdata.a cdata.o cdata-iter.o cdata-encode.o \
