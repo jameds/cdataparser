@@ -74,14 +74,15 @@ cdata_size_bytes (size_t n)
 	return (1 << ((n > 0xFC) + (n > 0xFFFC)));
 }
 
-void
+int
 cdata_encode_size
 (		void * buffer,
 		size_t val)
 {
 	const size_t enc = (val << 2);
+	const int nbs = cdata_size_bytes(val);
 
-	switch (cdata_size_bytes(val))
+	switch (nbs)
 	{
 		case 4:
 			cdata_encode32(buffer, ((enc & 0xFFFFFFFF) | 2));
@@ -94,6 +95,8 @@ cdata_encode_size
 		default:
 			*(unsigned char*)buffer = (enc & 0xFF);
 	}
+
+	return nbs;
 }
 
 size_t

@@ -140,26 +140,18 @@ enum {
 	CDATA_WRITE,
 };
 
-/* returns a pointer where it is safe to write size bytes
-   on wire */
-#define cdata_wire_offset(wire, size) \
-	(&((char*)(wire))[cdata_size_bytes(size)])
-
 /*
 machine points to the struct member being (un)packed.
 
-In CDATA_READ mode, wire points to encoded data, size
-refers to the length of this data. The return value is
-ignored.
+The return value is the number of bytes r/w.
+
+In CDATA_READ mode, wire points to already encoded data.
 
 In CDATA_WRITE mode, wire may be NULL or point to
 a buffer, into which encoded data must be written.
-cdata_wire_offset must be used to write to this buffer.
-The return value is the number of bytes written to or
-expected to be written to this buffer.
 */
-typedef size_t(*cdata_packer)(void *wire, int mode,
-		size_t size, void *machine);
+typedef size_t(*cdata_packer)(int mode,
+		char *wire, char *machine);
 
 struct packdef_custom {
 	size_t ofs;
@@ -192,11 +184,17 @@ void cdata_encode32 (void *buffer, long val);
 long cdata_decode16 (const void *buffer);
 long cdata_decode32 (const void *buffer);
 
+/*
+VARIABLE LENGTH DATA
+*/
+
 /* Returns the number of bytes used to encode a size
    value. */
 int cdata_size_bytes (size_t);
 
-void cdata_encode_size (void *buffer, size_t val);
+/* Ditto return value as cdata_size_bytes. */
+int cdata_encode_size (void *buffer, size_t val);
+
 size_t cdata_decode_size (const void *buffer);
 
 #endif/*cdataparser_cdata_H*/

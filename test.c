@@ -5,33 +5,25 @@
 
 static size_t
 pack_B_b
-(		void * buffer,
-		int mode,
-		size_t size,
-		void * var)
+(		int mode,
+		char * buffer,
+		char * var)
 {
-	void **n = var;
+	void **n = (void**)var;
 
 	if (mode == CDATA_READ)
 	{
-		if (size == 2)
-		{
-			*n = (void*)(cdata_decode16(buffer) / 2);
-		}
+		*n = (void*)(cdata_decode16(buffer) / 2);
 	}
 	else if (mode == CDATA_WRITE)
 	{
-		size = 2;
-
 		if (buffer)
 		{
-			cdata_encode16(
-					cdata_wire_offset(buffer, size),
-					(long)*n * 2);
+			cdata_encode16(buffer, (long)*n * 2);
 		}
 	}
 
-	return size;
+	return 2;
 }
 
 PACKDEF (A_def) struct A {

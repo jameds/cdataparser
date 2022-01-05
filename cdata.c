@@ -171,45 +171,17 @@ call_custom
 
 	char *var = &P->object[ofs];
 
-	size_t exp;
 	size_t out;
-	size_t act;
 
 	for (i = 0; i < def->num_custom; ++i)
 	{
-		if (P->mode == CDATA_READ)
-		{
-			exp = cdata_decode_size(P->wire);
-
-			if (P->wire)
-				P->wire += cdata_size_bytes(exp);
-		}
-		else
-			exp = 0;
-
-		out = custom[i].cb(P->wire, P->mode, exp,
+		out = custom[i].cb(P->mode, P->wire,
 				&var[custom[i].ofs]);
 
-		if (out > CDATA_MAX_CUSTOM_SIZE)
-			return fuckoff(), 1;
+		if (P->wire)
+			P->wire += out;
 
-		act = cdata_size_bytes(out) + out;
-
-		if (P->mode == CDATA_WRITE)
-		{
-			if (P->wire)
-			{
-				cdata_encode_size(P->wire, out);
-				P->wire += act;
-			}
-		}
-		else
-		{
-			if (P->wire)
-				P->wire += out;
-		}
-
-		P->size += act;
+		P->size += out;
 	}
 
 	P->ofs = ofs;
