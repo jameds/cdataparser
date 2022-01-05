@@ -42,9 +42,10 @@ PACKDEF (B_def) typedef struct {
 #endif
 
 static void
-enpack (B *bruh)
+enpack
+(		struct pack_state * P,
+		B * bruh)
 {
-	struct pack_state *P = cdata_new(&B_def, bruh);
 	char *buffer = malloc(cdata_get_pack_size(P));
 	size_t n = cdata_pack(P, buffer);
 	fprintf(stderr, "%ld\n", n);
@@ -53,10 +54,10 @@ enpack (B *bruh)
 
 static void
 unpack
-(		B * bruh,
+(		struct pack_state * P,
+		B * bruh,
 		size_t n)
 {
-	struct pack_state *P = cdata_new(&B_def, bruh);
 	char *buffer = malloc(n);
 	fread(buffer, 1, n, stdin);
 	cdata_unpack(P, buffer);
@@ -70,6 +71,13 @@ help (void)
 			"./test d size < file # decode test\n",
 			stderr);
 	return 1;
+}
+
+static struct pack_state *
+load (B *bruh)
+{
+	struct pack_state *P = cdata_new(&B_def);
+	return cdata_load(P, bruh), P;
 }
 
 int
@@ -91,14 +99,14 @@ main
 		bruh.a.c[0] = 127;
 		bruh.a.c[1] = 4096;
 		bruh.b = (void*)33;
-		enpack(&bruh);
+		enpack(load(&bruh), &bruh);
 	}
 	else if (!strcmp(av[1], "d"))
 	{
 		if (ac != 3)
 			return help();
 
-		unpack(&bruh, atoi(av[2]));
+		unpack(load(&bruh), &bruh, atoi(av[2]));
 		printf(
 				"%.4s\n"
 				"%d, %d\n"

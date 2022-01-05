@@ -195,6 +195,9 @@ iter_custom
 		int mode,
 		char * buffer)
 {
+	if (!P->object)
+		return fuckoff(), 0;
+
 	P->wire = buffer;
 	P->mode = mode;
 	P->size = 0;
@@ -206,9 +209,7 @@ iter_custom
 }
 
 struct pack_state *
-cdata_new
-(		struct packdef const * def,
-		void const * object)
+cdata_new (struct packdef const *def)
 {
 	struct pack_state *P = malloc(sizeof *P);
 
@@ -216,11 +217,18 @@ cdata_new
 		return fuckoff(), NULL;
 
 	P->def = def;
+
+	return P;
+}
+
+void
+cdata_load
+(		struct pack_state * P,
+		void const * object)
+{
 	/* Force remove the const so this can operate
 		read/write later; amazingly safe and proper code. */
 	P->object = memchr(object, *(const char*)object, 1);
-
-	return P;
 }
 
 void

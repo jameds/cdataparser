@@ -165,8 +165,9 @@ typedef void(*cdata_error_handler)(
 void cdata_set_error_handler (cdata_error_handler);
 
 /* May return NULL. */
-struct pack_state * cdata_new (struct packdef const*,
-		void const *object);
+struct pack_state * cdata_new (struct packdef const*);
+
+void cdata_load (struct pack_state*, void const *object);
 
 void cdata_close (struct pack_state*);
 
