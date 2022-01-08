@@ -73,49 +73,78 @@ cdata_set_error_handler (cdata_error_handler cb)
 
 static void
 decode_align
-(		struct pack_state * P,
-		size_t k,
+(		void const * p,
 		int align,
-		struct packdef_part const * part)
+		void * var)
 {
-	char *p = &P->wire[k];
-	char *var = &P->object[P->ofs + part->ofs + k];
-
 	if (align == 2)
 		*(int16_t*)var = cdata_decode16(p);
-	else
+	else if (align == 4)
 		*(int32_t*)var = cdata_decode32(p);
 }
 
 static void
 encode_align
-(		struct pack_state * P,
-		size_t k,
+(		void * p,
 		int align,
-		struct packdef_part const * part)
+		void const * var)
 {
-	char *p = &P->wire[k];
-	char *var = &P->object[P->ofs + part->ofs + k];
-
 	if (align == 2)
-		cdata_encode16(p, *(int16_t*)var);
-	else
-		cdata_encode32(p, *(int32_t*)var);
+		cdata_encode16(p, *(int16_t const*)var);
+	else if (align == 4)
+		cdata_encode32(p, *(int32_t const*)var);
 }
 
-static void
-pack_array
-(		struct pack_state * P,
-		void(*pk)(struct pack_state*,
-			size_t,int,struct packdef_part const*),
-		struct packdef_part const * part)
+static int
+align_copy
+(		void * p,
+		size_t size,
+		int align,
+		void const * s)
+{
+	if (align == 2 || align == 4)
+		return 1;
+	else
+		return memcpy(p, s, size), 0;
+}
+
+void
+cdata_encode_array
+(		void * wire,
+		void const * var,
+		size_t size,
+		int align)
 {
 	size_t k = 0;
 
-	while (k < part->siz)
+	if (align_copy(wire, size, align, var))
 	{
-		pk(P, k, part->align, part);
-		k += part->align;
+		while (k < size)
+		{
+			encode_align(&((char*)wire)[k], align,
+					&((char const*)var)[k]);
+			k += align;
+		}
+	}
+}
+
+void
+cdata_decode_array
+(		void const * wire,
+		void * var,
+		size_t size,
+		int align)
+{
+	size_t k = 0;
+
+	if (align_copy(var, size, align, wire))
+	{
+		while (k < size)
+		{
+			decode_align(&((char const*)wire)[k],
+					align, &((char*)var)[k]);
+			k += align;
+		}
 	}
 }
 
@@ -126,27 +155,22 @@ call_part
 		void * udata)
 {
 	struct pack_state *P = udata;
+	char *var = &P->object[P->ofs + ofs];
 
 	if (P->wire)
 	{
-		if (part->align == 2 || part->align == 4)
-		{
-			if (part->siz % part->align)
-				return fuckoff(), 1;
+		if (part->siz % part->align)
+			return fuckoff(), 1;
 
-			pack_array(P, P->mode == CDATA_READ ?
-					decode_align : encode_align, part);
-		}
-		else if (part->siz == 2 || part->siz == 4)
+		if (P->mode == CDATA_READ)
 		{
-			(P->mode == CDATA_READ ?
-					decode_align :
-					encode_align)(P, 0, part->siz, part);
+			cdata_decode_array(P->wire, var, part->siz,
+					part->align);
 		}
 		else
 		{
-			memcpy(P->wire, &P->object[P->ofs + ofs],
-					part->siz);
+			cdata_encode_array(P->wire, var, part->siz,
+					part->align);
 		}
 
 		P->wire += part->siz;

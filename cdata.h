@@ -185,6 +185,13 @@ void cdata_encode32 (void *buffer, long val);
 long cdata_decode16 (const void *buffer);
 long cdata_decode32 (const void *buffer);
 
+/* These functions automatically call encode/decode16/32
+   for the length of an array else straight memcpy. */
+void cdata_encode_array (void *buffer, const void *var,
+		size_t size, int align);
+void cdata_decode_array (const void *buffer, void *var,
+		size_t size, int align);
+
 /*
 VARIABLE LENGTH DATA
 */
