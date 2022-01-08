@@ -1,2 +1,9 @@
 A small program and library to automate serialization of
 data structures.
+
+---
+
+Major changes (newest to oldest):
+
+502f893 - Fixed non 2/4 byte arrays not unpacking at all.
+eea89db - Custom API changed entirely.
